@@ -1,0 +1,5 @@
+<p>
+  <b><%= @user.name %></b>
+</p>
+
+<p><%= link "Back", to: user_path(@conn, :index) %></p>
