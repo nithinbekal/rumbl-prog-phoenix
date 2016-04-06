@@ -20,6 +20,15 @@ let Video = {
     let postButton   = document.getElementById("msg-submit")
     let vidChannel   = socket.channel("videos:" + videoId)
 
+    msgContainer.addEventListener("click", e => {
+      e.preventDefault()
+      let seconds = e.target.getAttribute("data-seek") ||
+        e.target.parentNode.getAttribute("data-seek")
+      if(!seconds) { return }
+
+      Player.seekTo(seconds)
+    })
+
     postButton.addEventListener("click", e => {
       let payload = {body: msgInput.value, at: Player.getCurrentTime()}
       vidChannel.push("new_annotation", payload)
@@ -32,13 +41,35 @@ let Video = {
     })
 
     vidChannel.join()
+      .receive("ok", ({annotations}) => {
+        this.scheduleMessages(msgContainer, annotations)
+      })
+  },
+
+  scheduleMessages(msgContainer, annotations) {
+    setTimeout(() => {
+      let ctime = Player.getCurrentTime()
+      let remaining = this.renderAtTime(annotations, ctime, msgContainer)
+      this.scheduleMessages(msgContainer, remaining)
+    }, 1000)
+  },
+
+  renderAtTime(annotations, seconds, msgContainer) {
+    return annotations.filter(ann => {
+      if(ann.at > seconds) {
+        return true
+      } else {
+        this.renderAnnotation(msgContainer, ann)
+        return false
+      }
+    })
   },
 
   renderAnnotation(msgContainer, {user, body, at}) {
-    console.log("Haha")
     let template = document.createElement("div")
     template.innerHTML = `
       <a href="#" data-seek="${this.esc(at)}">
+        [${this.formatTime(at)}]
         <b>${this.esc(user.username)}</b>: ${this.esc(body)}
       </a>
     `
@@ -50,6 +81,12 @@ let Video = {
     let div = document.createElement("div")
     div.appendChild(document.createTextNode(str))
     return div.innerHTML
+  },
+
+  formatTime(t) {
+    let date = new Date(null)
+    date.setSeconds(t/1000)
+    return date.toISOString().substr(14, 5)
   }
 }
 
