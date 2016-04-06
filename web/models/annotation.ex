@@ -3,14 +3,14 @@ defmodule Rumbl.Annotation do
 
   schema "annotations" do
     field :body, :string
-    field :as, :integer
+    field :at, :integer
     belongs_to :user, Rumbl.User
     belongs_to :video, Rumbl.Video
 
     timestamps
   end
 
-  @required_fields ~w(body as)
+  @required_fields ~w(body at)
   @optional_fields ~w()
 
   @doc """
