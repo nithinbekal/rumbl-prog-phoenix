@@ -11,7 +11,6 @@ defmodule Rumbl.VideoChannel do
   end
 
   def handle_in("new_annotation", params, user, socket) do
-    IO.inspect params
     changeset =
       user
       |> build_assoc(:annotations, video_id: socket.assigns.video_id)
