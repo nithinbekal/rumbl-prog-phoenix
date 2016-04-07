@@ -9,7 +9,6 @@ defmodule Rumbl do
     children = [
       supervisor(Rumbl.Endpoint, []),
       supervisor(Rumbl.Repo, []),
-      supervisor(Rumbl.InfoSys.Supervisor, []),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
