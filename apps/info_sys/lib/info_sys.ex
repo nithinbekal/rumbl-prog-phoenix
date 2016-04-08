@@ -29,7 +29,7 @@ defmodule InfoSys do
   defp spawn_query(backend, query, limit) do
     query_ref = make_ref()
     opts = [backend, query, query_ref, self(), limit]
-    {:ok, pid} = Supervisor.start_child(Rumbl.InfoSys.Supervisor, opts)
+    {:ok, pid} = Supervisor.start_child(InfoSys.Supervisor, opts)
     monitor_ref = Process.monitor(pid)
     {pid, monitor_ref, query_ref}
   end
@@ -50,6 +50,9 @@ defmodule InfoSys do
         Process.demonitor(monitor_ref, [:flush])
         await_result(tail, results ++ acc, timeout)
       {:DOWN, monitor_ref, :process, ^pid, _reason} ->
+        await_result(tail, acc, timeout)
+      :timedout ->
+        kill(pid, monitor_ref)
         await_result(tail, acc, timeout)
     after
       timeout ->
